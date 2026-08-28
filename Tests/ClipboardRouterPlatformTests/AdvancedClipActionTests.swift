@@ -25,7 +25,7 @@ final class AdvancedClipActionTests: XCTestCase {
 }
 
 @MainActor
-private func XCTAssertThrowsErrorAsync<T>(
+private func XCTAssertThrowsErrorAsync<T: Sendable>(
     _ expression: () async throws -> T,
     verify: (Error) -> Void,
     file: StaticString = #filePath,

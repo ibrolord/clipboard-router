@@ -100,7 +100,7 @@ private final class ActionFakePasteboard: PasteboardWriting {
 }
 
 @MainActor
-private func XCTAssertThrowsErrorAsync<T>(
+private func XCTAssertThrowsErrorAsync<T: Sendable>(
     _ expression: () async throws -> T,
     file: StaticString = #filePath,
     line: UInt = #line
