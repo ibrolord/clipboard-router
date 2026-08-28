@@ -1,0 +1,27 @@
+Clipboard Router turns your Mac clipboard into an organized, searchable workspace.
+
+Keep useful clips close
+
+Browse recent clipboard history, save the items that matter, pin frequent clips, create notes, and organize saved content into folders and smart views.
+
+Find what you copied
+
+Search clip content and metadata, or narrow the library with built-in views for links, images, files, PDFs, recent items, and frequently used content.
+
+Work from the menu bar
+
+Open recent clips without leaving your current task. Copy an item again, create a note, start Quick Paste, or open the full library when you need more context.
+
+Build deliberate workflows
+
+Turn clips into reviewed actions, collect several clips into a focused paste stack, and create local organization rules that can be previewed before they run. App handoffs copy content and open the destination; Clipboard Router does not automatically submit a prompt or message.
+
+Protect sensitive moments
+
+Start a Private Session when new clips should remain only in memory. Sensitive Review helps separate potentially sensitive values from ordinary history. The Vault keeps selected clips encrypted and requires authentication before revealing their contents.
+
+Designed for macOS
+
+Clipboard Router is a native menu-bar app with keyboard shortcuts, drag-and-drop organization, and a three-column library built for quick scanning and focused review.
+
+No account is required for the local clipboard workspace. Clipboard contents remain under your control, and features that can send content outside the app require an explicit action or opt-in configuration.

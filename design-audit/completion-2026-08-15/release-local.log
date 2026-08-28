@@ -1,0 +1,13 @@
+--prepared:$REPO_ROOT/.artifacts/ClipboardRouter.app/Contents/Helpers/cr
+--validated:$REPO_ROOT/.artifacts/ClipboardRouter.app/Contents/Helpers/cr
+.artifacts/ClipboardRouter.app: valid on disk
+.artifacts/ClipboardRouter.app: satisfies its Designated Requirement
+.artifacts/ClipboardRouter.app/Contents/Helpers/cr: valid on disk
+.artifacts/ClipboardRouter.app/Contents/Helpers/cr: satisfies its Designated Requirement
+Verified: .artifacts/ClipboardRouter.app
+Bundle: com.clipboardrouter.ClipboardRouter
+Version: 0.1.0 (1)
+Minimum macOS: 14.0
+Entitlement profile: local
+Signature: ad-hoc local verification
+Notarization: not required by this verification run

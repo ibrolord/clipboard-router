@@ -1,0 +1,1 @@
+clipboard,history,copy,paste,notes,productivity,organize,privacy,menu bar,workflow

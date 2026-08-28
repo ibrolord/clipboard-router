@@ -1,0 +1,36 @@
+Building ClipboardRouter and cr (release; arm64)...
+[0/1] Planning build
+Building for production...
+[0/2] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'ClipboardRouter' complete! (0.27s)
+Building for production...
+[0/2] Write swift-version--58304C5D6DBC2206.txt
+Build of product 'cr' complete! (0.15s)
+Signing cr with -...
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: replacing existing signature
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: valid on disk
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: satisfies its Designated Requirement
+Signing with -...
+$TMPDIR/clipboard-router-package/ClipboardRouter.app: replacing existing signature
+--prepared:$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr
+--validated:$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr
+$TMPDIR/clipboard-router-package/ClipboardRouter.app: valid on disk
+$TMPDIR/clipboard-router-package/ClipboardRouter.app: satisfies its Designated Requirement
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: valid on disk
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: satisfies its Designated Requirement
+swift-driver version: 1.148.6 $TMPDIR/clipboard-router-package/ClipboardRouter.app: replacing existing signature
+--prepared:$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr
+--validated:$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr
+$TMPDIR/clipboard-router-package/ClipboardRouter.app: valid on disk
+$TMPDIR/clipboard-router-package/ClipboardRouter.app: satisfies its Designated Requirement
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: valid on disk
+$TMPDIR/clipboard-router-package/ClipboardRouter.app/Contents/Helpers/cr: satisfies its Designated Requirement
+
+Packaged: .artifacts/ClipboardRouter.app
+Bundle ID: com.clipboardrouter.ClipboardRouter
+Version: 0.1.0 (1)
+Architectures: arm64
+CLI: .artifacts/ClipboardRouter.app/Contents/Helpers/cr
+Release manifest: .artifacts/ClipboardRouter.app.release.json
+Profile: local-only (no iCloud entitlement)
+Next: $REPO_ROOT/Scripts/verify_release.sh --profile local ".artifacts/ClipboardRouter.app"

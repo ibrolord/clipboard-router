@@ -1,0 +1,6 @@
+3f852b138d19396cfcd07b276c79ffff5c1873ede5500e0ae1ffe158d18794f2  .artifacts/ClipboardRouter.app.release.json
+bb5c74007c794d29364ce01aa648ecc6f78f26b348a664a30fae0d8854d00492  .artifacts/ClipboardRouter.app/Contents/MacOS/ClipboardRouter
+8cdcc5f4bb40ab72fd1d6667d6895394a51f7d43e7351cd346469984e733cc64  .artifacts/ClipboardRouter.app/Contents/Helpers/cr
+d43c5658e70f5dc62d6cc06916449daa35461902fd82d7b8c652dde8351f88b6  .artifacts/ui-acceptance/20260815T152904Z-53858/report.json
+e3a3852288da7ee6ab2781fa80ee31058494859444697e09131bd2f324620a56  .artifacts/ui-acceptance/20260815T152904Z-53858/ax-tree.txt
+1dd87e5ce79a46bff76d4b5190aae728ad477af75cbe93355ad9e889fe8f994f  .artifacts/ui-acceptance/20260815T152904Z-53858/screen-1.png

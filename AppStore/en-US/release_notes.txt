@@ -1,0 +1,1 @@
+Initial release of Clipboard Router for macOS, including searchable clipboard history, saved clips and notes, folders and smart views, menu-bar access, Private Sessions, encrypted Vault storage, reviewed actions, and local organization rules.

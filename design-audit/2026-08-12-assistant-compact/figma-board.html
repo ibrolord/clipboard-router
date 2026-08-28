@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clipboard Router — Compact Assistant UX</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      --canvas: #f0f0f5;
+      --surface: #fff;
+      --ink: #19191b;
+      --muted: #68686d;
+      --line: #d4d4d9;
+      --accent: #0a72ef;
+      --good: #17823b;
+      --note: #f6f7fa;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--canvas); color: var(--ink); }
+    main { width: 1800px; margin: 0 auto; padding: 48px; }
+    header { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 30px; }
+    h1 { font-size: 34px; letter-spacing: -.6px; margin: 0 0 8px; }
+    h2 { font-size: 20px; margin: 0 0 12px; }
+    h3 { font-size: 14px; margin: 0; }
+    p { margin: 0; color: var(--muted); line-height: 1.45; }
+    .tag { padding: 8px 12px; border-radius: 999px; background: #dff3e5; color: var(--good); font-weight: 650; font-size: 13px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,.05); }
+    .card-head { padding: 18px 20px 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .eyebrow { color: var(--accent); font-size: 12px; text-transform: uppercase; letter-spacing: .8px; font-weight: 700; }
+    .shot { min-height: 270px; padding: 16px; display: grid; place-items: center; background: #1e1e20; border-block: 1px solid #2d2d31; }
+    .shot img { max-width: 100%; max-height: 310px; object-fit: contain; border-radius: 12px; }
+    .notes { padding: 18px 20px 22px; display: grid; gap: 10px; }
+    .note { display: grid; grid-template-columns: 22px 1fr; gap: 8px; align-items: start; color: #424248; font-size: 14px; line-height: 1.35; }
+    .num { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: #e7f1ff; color: var(--accent); font-size: 11px; font-weight: 700; }
+    .response-mock { width: 100%; max-width: 560px; padding: 14px; background: #242426; color: #f4f4f5; border-radius: 14px; display: grid; gap: 8px; }
+    .assistant-top, .assistant-actions, .composer-footer { display: flex; align-items: center; gap: 8px; }
+    .assistant-top strong { flex: 1; }
+    .pill { border: 1px solid #55555b; background: #353539; border-radius: 7px; padding: 5px 9px; font-size: 12px; }
+    .pill.active { background: var(--accent); border-color: var(--accent); }
+    .response { padding: 10px; background: #303034; border-radius: 10px; color: #dedee2; font-size: 13px; line-height: 1.4; }
+    .composer { border: 1px solid #55555b; border-radius: 10px; overflow: hidden; }
+    .composer-body { min-height: 48px; padding: 10px; color: #a9a9af; font-size: 13px; }
+    .composer-footer { border-top: 1px solid #45454a; padding: 8px; color: #a9a9af; font-size: 11px; }
+    .composer-footer .send { margin-left: auto; background: var(--accent); color: white; padding: 5px 10px; border-radius: 7px; font-weight: 650; }
+    .principles { margin-top: 28px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 24px; }
+    .journey { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 16px; }
+    .step { padding: 16px; border-radius: 12px; background: var(--note); border: 1px solid #e5e5e9; }
+    .step strong { display: block; margin-bottom: 5px; }
+    ul { margin: 14px 0 0; padding-left: 20px; color: #444448; line-height: 1.55; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: #eeeef2; padding: 2px 5px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Clipboard Router — Compact Assistant</h1>
+      <p>Implementation-ready UX map · verified against the SwiftUI build · August 12, 2026</p>
+    </div>
+    <span class="tag">401 tests passing</span>
+  </header>
+
+  <section class="grid" aria-label="Assistant state comparison">
+    <article class="card">
+      <div class="card-head"><div><div class="eyebrow">Before</div><h2>Oversized empty state</h2></div></div>
+      <div class="shot"><img src="01-before.png" alt="Original oversized Assistant sheet"></div>
+      <div class="notes">
+        <div class="note"><span class="num">1</span><span>The idle conversation card repeats the prompt’s job and consumes most of the sheet.</span></div>
+        <div class="note"><span class="num">2</span><span>Preset controls compete with the editor instead of accelerating it.</span></div>
+        <div class="note"><span class="num">3</span><span>The primary action sits far from the question field.</span></div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-head"><div><div class="eyebrow">State 1</div><h2>Compact idle</h2></div><span class="tag">560 × 201</span></div>
+      <div class="shot"><img src="02-compact-open.jpg" alt="Compact idle Assistant sheet"></div>
+      <div class="notes">
+        <div class="note"><span class="num">1</span><span>Header, source, engine, presets, editor, disclosure, and Send fit in one scan.</span></div>
+        <div class="note"><span class="num">2</span><span>No empty conversation panel; it appears only after Send.</span></div>
+        <div class="note"><span class="num">3</span><span><code>⌘ Return</code> and the visible Send button share one guarded submission path.</span></div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-head"><div><div class="eyebrow">State 2</div><h2>Preset selected</h2></div></div>
+      <div class="shot"><img src="03-compact-research.jpg" alt="Compact Assistant with Research selected"></div>
+      <div class="notes">
+        <div class="note"><span class="num">1</span><span>The selected purpose is obvious without a second navigation layer.</span></div>
+        <div class="note"><span class="num">2</span><span>Switching presets replaces only untouched templates.</span></div>
+        <div class="note"><span class="num">3</span><span>User-edited prompts remain intact and no preset click sends or dismisses the sheet.</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="principles">
+    <article class="panel">
+      <h2>State 3 — Response and follow-up</h2>
+      <div class="response-mock" aria-label="Response state wireframe">
+        <div class="assistant-top"><strong>Ask Assistant</strong><span class="pill active">On this Mac</span><span class="pill">Cloud</span><span>×</span></div>
+        <div class="assistant-actions"><span class="pill active">Ask</span><span class="pill">Extract details</span><span class="pill">Rewrite</span><span class="pill">Format</span></div>
+        <div class="response"><strong>Response</strong><br>Answer text appears here only after an explicit send. Copy and Save to Notes live in this response header, not in the idle sheet.</div>
+        <div class="composer"><div class="composer-body">Ask a follow-up…</div><div class="composer-footer">🔒 Stays on this Mac <span class="send">Send Follow-up</span></div></div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <h2>Interaction contract</h2>
+      <ul>
+        <li>Nothing runs when the sheet opens or a preset is selected.</li>
+        <li>Conversation expands progressively after Send.</li>
+        <li>Cloud disclosure changes before submission, never after.</li>
+        <li>Only one request may be in flight; double-submit is coalesced.</li>
+        <li>Cancel suppresses late results and cancellation noise.</li>
+        <li>Failed sends restore the outgoing prompt only when the user has not typed something new.</li>
+      </ul>
+    </article>
+  </section>
+
+  <section class="panel" style="margin-top:24px">
+    <h2>User journey</h2>
+    <div class="journey">
+      <div class="step"><strong>1 · Confirm context</strong><p>See the clipped source and processing mode.</p></div>
+      <div class="step"><strong>2 · Choose intent</strong><p>Use a preset or write a custom instruction.</p></div>
+      <div class="step"><strong>3 · Review and send</strong><p>Disclosure and destination remain visible beside Send.</p></div>
+      <div class="step"><strong>4 · Use the result</strong><p>Copy, save as a note, or ask a follow-up without losing context.</p></div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

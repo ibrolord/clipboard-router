@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleDisplayName</key>
+	<string>Clipboard Router</string>
+	<key>CFBundleExecutable</key>
+	<string>ClipboardRouter</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.clipboardrouter.ClipboardRouter</string>
+	<key>CFBundleIconFile</key>
+	<string>ClipboardRouter</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Clipboard Router</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.clipboardrouter.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>clipboardrouter</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.productivity</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>LSMultipleInstancesProhibited</key>
+	<true/>
+	<key>LSUIElement</key>
+	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+	<string>Clipboard Router adds an event only after you review and confirm a detected date.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Clipboard Router saves a contact only after you review and confirm a detected phone number or email address.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Clipboard Router can attach an approximate area derived locally from a shortened geohash when you enable it. It does not use reverse geocoding, and exact coordinates are never stored.</string>
+	<key>CKSharingSupported</key>
+	<true/>
+	<key>ClipboardRouterCloudKitPushEnabled</key>
+	<false/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 Clipboard Router. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSSupportsSuddenTermination</key>
+	<false/>
+</dict>
+</plist>

@@ -1,0 +1,15 @@
+.DS_Store
+.build/
+.artifacts/
+.swiftpm/
+DerivedData/
+*.xcarchive
+*.dSYM/
+*.cer
+*.p12
+*.pem
+*.mobileprovision
+*.provisionprofile
+.env
+.env.*
+!.env.example

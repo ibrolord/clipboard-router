@@ -1,0 +1,120 @@
+{
+  "appearance" : "NSAppearance.Name.darkAqua",
+  "fixtureHistoryCount" : 1001,
+  "renderedAt" : "2026-08-15T15:59:56Z",
+  "renderer" : "NSHostingView.cacheDisplay (app-only; no desktop capture)",
+  "scenarios" : [
+    {
+      "accessibilityAnchorCount" : 4,
+      "file" : "menu-bar-420x500.png",
+      "geometry" : {
+        "clipListHeight" : 334,
+        "clipListMinimumHeight" : 220,
+        "nativeAccessibilityAnchorCount" : 2,
+        "searchWidth" : 396
+      },
+      "logicalHeight" : 500,
+      "logicalWidth" : 420,
+      "nontransparentPixelRatio" : 1,
+      "pixelHeight" : 500,
+      "pixelWidth" : 420,
+      "sampledColorCount" : 86,
+      "sha256" : "0c1eca798e003ebffc7d05b674d3767dad516e6d2f9804e690ac82df1187b1b0",
+      "surface" : "menu-bar",
+      "visibleNativeViewCount" : 77
+    },
+    {
+      "accessibilityAnchorCount" : 2,
+      "file" : "library-minimum-900x590.png",
+      "geometry" : {
+        "nativeAccessibilityAnchorCount" : 1,
+        "scrollViewCount" : 5,
+        "sidebarContractWidth" : 240,
+        "splitViewCount" : 2
+      },
+      "logicalHeight" : 590,
+      "logicalWidth" : 900,
+      "nontransparentPixelRatio" : 1,
+      "pixelHeight" : 590,
+      "pixelWidth" : 900,
+      "sampledColorCount" : 177,
+      "sha256" : "5efb44477b37cc61db50668669b368e34d2cbf5d15d89bef1f1b42a7445f809f",
+      "surface" : "library-minimum",
+      "visibleNativeViewCount" : 216
+    },
+    {
+      "accessibilityAnchorCount" : 2,
+      "file" : "library-normal-1080x700.png",
+      "geometry" : {
+        "nativeAccessibilityAnchorCount" : 1,
+        "scrollViewCount" : 4,
+        "sidebarContractWidth" : 240,
+        "splitViewCount" : 2
+      },
+      "logicalHeight" : 700,
+      "logicalWidth" : 1080,
+      "nontransparentPixelRatio" : 1,
+      "pixelHeight" : 700,
+      "pixelWidth" : 1080,
+      "sampledColorCount" : 185,
+      "sha256" : "f63fb0a2b6143c815961e49e07658f6aac0825aecd282e8d8c8614058d8f3a36",
+      "surface" : "library-normal",
+      "visibleNativeViewCount" : 235
+    },
+    {
+      "accessibilityAnchorCount" : 3,
+      "file" : "continuation-make-note-560x470.png",
+      "geometry" : {
+        "bodyHeight" : 230,
+        "nativeAccessibilityAnchorCount" : 2,
+        "titleWidth" : 516
+      },
+      "logicalHeight" : 470,
+      "logicalWidth" : 560,
+      "nontransparentPixelRatio" : 1,
+      "pixelHeight" : 470,
+      "pixelWidth" : 560,
+      "sampledColorCount" : 105,
+      "sha256" : "5e1511bc223ff6edb42578abd69c966c8e7c44420b6c854e31a8f2e3d3b95c6e",
+      "surface" : "continuation-make-note",
+      "visibleNativeViewCount" : 24
+    },
+    {
+      "accessibilityAnchorCount" : 4,
+      "file" : "continuation-edit-clip-560x500.png",
+      "geometry" : {
+        "bodyHeight" : 247,
+        "nativeAccessibilityAnchorCount" : 2,
+        "titleWidth" : 516
+      },
+      "logicalHeight" : 500,
+      "logicalWidth" : 560,
+      "nontransparentPixelRatio" : 1,
+      "pixelHeight" : 500,
+      "pixelWidth" : 560,
+      "sampledColorCount" : 127,
+      "sha256" : "9d08c21bdf46c10335e743bd4a1fa1dda2283944b2a8caf7530a5170531b071e",
+      "surface" : "continuation-edit-clip",
+      "visibleNativeViewCount" : 18
+    },
+    {
+      "accessibilityAnchorCount" : 2,
+      "file" : "continuation-ai-600x260.png",
+      "geometry" : {
+        "composerHeight" : 90,
+        "nativeAccessibilityAnchorCount" : 2,
+        "processingModeWidth" : 176
+      },
+      "logicalHeight" : 260,
+      "logicalWidth" : 600,
+      "nontransparentPixelRatio" : 1,
+      "pixelHeight" : 260,
+      "pixelWidth" : 600,
+      "sampledColorCount" : 96,
+      "sha256" : "1e536395470b0c2da5b23f9992e95855ccf43399d52516c9f17a61a2dbdd1a36",
+      "surface" : "continuation-ai",
+      "visibleNativeViewCount" : 25
+    }
+  ],
+  "schemaVersion" : 1
+}
