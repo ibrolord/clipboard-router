@@ -423,7 +423,7 @@ public actor CloudKitSavedLibraryTransport: SavedLibrarySyncTransport {
     /// Apple supplies CKErrorRetryAfterKey for rate limiting and service unavailability. Retry a
     /// single time after the full requested delay; repeated failures return to the coordinator so
     /// local changes stay queued and the UI remains responsive to a later explicit sync attempt.
-    private func withCloudKitRetryAfter<T>(
+    private func withCloudKitRetryAfter<T: Sendable>(
         remainingAttempts: Int = 1,
         operation: () async throws -> T
     ) async throws -> T {
