@@ -167,7 +167,15 @@ private struct LibrarySceneRoot: View {
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    static let sharedModel = UIAcceptanceRuntime.makeModelIfEnabled() ?? AppModel()
+    static let sharedModel: AppModel = makeSharedModel()
+
+    private static func makeSharedModel() -> AppModel {
+        if let acceptanceModel = UIAcceptanceRuntime.makeModelIfEnabled() {
+            return acceptanceModel
+        }
+        return AppModel()
+    }
+
     private weak var model: AppModel?
     private var pendingShareMetadata: [CKShare.Metadata] = []
     private var pendingRemoteNotifications: [[String: Any]] = []
