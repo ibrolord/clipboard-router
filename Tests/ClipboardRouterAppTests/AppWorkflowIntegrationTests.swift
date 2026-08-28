@@ -1855,8 +1855,11 @@ final class AppWorkflowIntegrationTests: XCTestCase {
 
         model.copy(first)
         model.copy(second)
-        try await Task.sleep(for: .milliseconds(140))
+        let completed = await waitUntil(timeout: .seconds(2)) {
+            writer.writtenContents.count == 2
+        }
 
+        XCTAssertTrue(completed)
         XCTAssertEqual(writer.writtenContents, [first.content, second.content])
         XCTAssertEqual(writer.maximumConcurrentWriteCount, 1)
     }
