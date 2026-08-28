@@ -606,7 +606,7 @@ private final class FakeDestinationPreferences: DestinationApplicationPreference
     }
 }
 
-private final class FakeApplicationBookmarkStore: ApplicationBookmarking {
+private final class FakeApplicationBookmarkStore: ApplicationBookmarking, @unchecked Sendable {
     var stoppedURLs: [URL] = []
 
     func bookmarkData(forApplicationAt url: URL) throws -> Data {

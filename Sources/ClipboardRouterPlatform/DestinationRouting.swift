@@ -374,13 +374,13 @@ public struct ResolvedApplicationBookmark: Equatable, Sendable {
     }
 }
 
-public protocol ApplicationBookmarking: AnyObject {
+public protocol ApplicationBookmarking: AnyObject, Sendable {
     func bookmarkData(forApplicationAt url: URL) throws -> Data
     func resolveApplicationBookmark(_ data: Data) throws -> ResolvedApplicationBookmark
     func stopAccessing(_ bookmark: ResolvedApplicationBookmark)
 }
 
-public final class SecurityScopedApplicationBookmarkStore: ApplicationBookmarking {
+public final class SecurityScopedApplicationBookmarkStore: ApplicationBookmarking, @unchecked Sendable {
     public init() {}
 
     public func bookmarkData(forApplicationAt url: URL) throws -> Data {
@@ -790,7 +790,7 @@ public final class PreparedDestinationTarget {
         }
     }
 
-    isolated deinit {
+    deinit {
         if !releasedSecurityScope,
            case let .desktop(_, bookmark?) = resolvedTarget
         {

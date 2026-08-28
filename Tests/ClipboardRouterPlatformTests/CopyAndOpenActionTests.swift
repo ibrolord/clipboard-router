@@ -382,7 +382,7 @@ private final class RecordingOpener: ExternalURLOpening {
     }
 }
 
-private final class UnusedBookmarks: ApplicationBookmarking {
+private final class UnusedBookmarks: ApplicationBookmarking, @unchecked Sendable {
     func bookmarkData(forApplicationAt url: URL) throws -> Data {
         XCTFail("copyAndOpen must not create a bookmark")
         return Data()
