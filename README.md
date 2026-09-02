@@ -1,15 +1,150 @@
+<div align="center">
+
+<img src="https://ibrolord.github.io/clipboard-router-releases/product/icon.png" width="112" alt="Clipboard Router">
+
 # Clipboard Router
 
+**Work from your clipboard toward 20× productivity.**
+
+Search everything you copy, turn repeated steps into automations, and keep sensitive clips
+encrypted so you never lose your flow.
+
+*20× is a goal for repetitive, clipboard-heavy work, not a guarantee across every task.*
+
+[Website](https://ibrolord.github.io/clipboard-router-releases/) ·
+[Download](https://github.com/ibrolord/clipboard-router-releases/releases/latest) ·
+[Features](https://ibrolord.github.io/clipboard-router-releases/#features) ·
+[Privacy](https://github.com/ibrolord/clipboard-router-releases/blob/main/PRIVACY.md)
+
 [![CI](https://github.com/ibrolord/clipboard-router/actions/workflows/ci.yml/badge.svg)](https://github.com/ibrolord/clipboard-router/actions/workflows/ci.yml)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Latest release](https://img.shields.io/github/v/release/ibrolord/clipboard-router-releases?label=release&color=0a84ff)](https://github.com/ibrolord/clipboard-router-releases/releases/latest)
+![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000)
+![Apple Silicon](https://img.shields.io/badge/arch-Apple%20Silicon-333333)
+[![MIT License](https://img.shields.io/badge/license-MIT-2ea043.svg)](LICENSE)
 
-Clipboard Router helps you work from your clipboard toward 20× productivity on repetitive
-workflows. It is a native, open-source macOS app that keeps copied work searchable, turns repeated
-steps into reviewable automations, and gives sensitive clips a safer place to go.
+```bash
+brew install --cask ibrolord/tap/clipboard-router
+```
 
-Download the signed app from the [release repository](https://github.com/ibrolord/clipboard-router-releases/releases/latest),
-install it with `brew install --cask ibrolord/tap/clipboard-router`, or build it locally from this
-repository.
+<img src="https://ibrolord.github.io/clipboard-router-releases/og.png" width="960" alt="Clipboard Router showing a searchable history of clips from Mac apps">
+
+</div>
+
+## Find captured work without doing it twice
+
+Search far beyond keywords: find text, links, images, and files by their content, source app, or
+surrounding context. When a clip matters, move it into Saved, attach a note, or organize it with
+Projects and Smart Views.
+
+- Recover a command, URL, image, or snippet after the clipboard has been overwritten.
+- Search by app, domain, type, date, folder, tag, secret category, or recency.
+- Read text from images locally with OCR and inspect the original clip representations.
+- Reach pinned and recent clips from the menu bar with Quick Paste.
+
+## Automate the work that starts with copy and paste
+
+Clipboard Router handles the repetitive steps between copying something and using it, while the
+final paste or send remains under your control.
+
+- **Paste Stack** queues several clips so you can switch apps once and paste them in order.
+- **Folder triggers** tag, file, or enrich a clip automatically when it lands in a watched folder,
+  and queue any external step for your review.
+- **Transforms** trim and reformat text, create Markdown quotes or code blocks, redact values,
+  format JSON, strip terminal formatting, and decode URLs.
+- **Reviewed actions** combine local organization with app and web handoffs without automatic sends.
+- **Auto Organize** previews deterministic filing rules and lets you undo the result.
+
+## Move faster without losing control of sensitive content
+
+Clipboard software can see passwords, API keys, and private tokens. Clipboard Router separates
+secret-like material from ordinary history and gives you explicit control over what is retained,
+revealed, or shared.
+
+- **Clipboard Health** detects secret-like content in text and OCR for review.
+- **Private Session** keeps new clips in memory and destroys them when the session ends.
+- **Vault** encrypts selected clips and requires authentication before revealing them.
+- **Encrypted sharing** protects a clip for a specific recipient and includes replay protection.
+- **Base64 sharing** remains clearly labeled as reversible encoding, not encryption.
+
+## Everything included in the Mac app
+
+| Area | Capabilities |
+|---|---|
+| **Capture and find** | Searchable history, menu-bar Quick Paste, advanced filters, Smart Views, OCR, previews, app exclusions, and pause controls. |
+| **Save and organize** | Saved clips, editable notes, nested folders, tags, drag-and-drop, bulk actions, and Auto Organize. |
+| **Combine and automate** | Combine Clips, Paste Stack, deterministic transforms, reviewed actions, folder triggers, durable recovery, and archive export. |
+| **Act across apps** | Actions for detected links, email addresses, phone numbers, and dates; verified routing to installed ChatGPT, Claude, and Codex apps; reviewed Contacts and Calendar drafts. |
+| **Assistant and insert** | On-device Apple Foundation Models on supported Macs, task presets, an Insert Palette, local aliases, and optional system-wide text expansion. |
+| **Protect sensitive content** | Clipboard Health, quarantine, Private Session, Vault, Base64 encoding, and recipient-key encrypted sharing. |
+| **Developer workflows** | Developer Projects, reviewed Markdown debug bundles, and the bundled `cr` tool for local analysis and transformations. |
+| **Native macOS experience** | Global shortcuts, multi-display placement, drag-and-drop, Launch at Login, Apple Developer ID signing, and notarization. |
+
+Salesforce and HubSpot connectors, iCloud saved-library sync, collaborative folders, and the hosted
+Assistant remain engineering previews rather than supported v0.1.0 features.
+
+## Designed around user control
+
+- **Local by default.** History, saved clips, notes, folders, quarantine, Private Sessions, and
+  Vault operate as local application data. The current build has no analytics transport.
+- **Routes, never submits.** A handoff copies the reviewed clip and opens the destination. You still
+  paste and press Send.
+- **Sensitive paths fail closed.** Vault, Private Session, quarantined, and other ineligible content
+  cannot enter ordinary automation, sync, or hosted-assistant paths.
+- **No account required.** The local workspace is free and works without a subscription or license key.
+
+The macOS pasteboard is shared with other running applications. Vault encryption at rest cannot
+protect plaintext after you deliberately place it back on the system pasteboard. Read the complete
+[privacy policy](https://github.com/ibrolord/clipboard-router-releases/blob/main/PRIVACY.md) before
+using Clipboard Router for sensitive material.
+
+## Install Clipboard Router
+
+Version 0.1.0 supports Apple-silicon Macs running macOS 14 or later.
+
+### Homebrew
+
+```bash
+brew install --cask ibrolord/tap/clipboard-router
+```
+
+### Direct download
+
+1. Download [Clipboard Router 0.1.0](https://github.com/ibrolord/clipboard-router-releases/releases/download/v0.1.0/Clipboard-Router-0.1.0-arm64.zip).
+2. Unzip it and move **Clipboard Router.app** to `/Applications`.
+3. Open it. Clipboard Router runs from the menu bar and has no persistent Dock icon.
+
+The download is Developer ID signed, notarized, and stapled. Its published SHA-256 checksum is:
+
+```text
+44d4c15cee3d5f155bdad65089434a93dc19baf1fe03dd247db7f9d50046cda6
+```
+
+## Build from source
+
+You need a Mac running macOS 14 or later and a Swift 6-capable Xcode toolchain.
+
+```bash
+git clone https://github.com/ibrolord/clipboard-router.git
+cd clipboard-router
+swift build
+swift test
+swift run ClipboardRouter
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and [SECURITY.md](SECURITY.md)
+before reporting a vulnerability.
+
+## Support and feedback
+
+[Open an issue](https://github.com/ibrolord/clipboard-router/issues) with the Clipboard Router
+version, macOS version, Mac model, and reproduction steps. Never include clipboard contents,
+credentials, or other secrets.
+
+<details>
+<summary><strong>Development, packaging, and release reference</strong></summary>
+
+The sections below document engineering builds, optional integrations, signing, packaging, and
+release verification. They are not required to install and use the public app.
 
 ### What the 20× goal means
 
@@ -542,6 +677,8 @@ SwiftPM resource bundles matching `ClipboardRouter_*.bundle` are preserved besid
   validation and an evidence manifest.
 
 Run any script with `--help` before using release credentials or production profiles.
+
+</details>
 
 ## License
 
