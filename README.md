@@ -16,7 +16,7 @@ promise for every task.
 [All features](#all-features) ·
 [Privacy](https://github.com/ibrolord/clipboard-router-releases/blob/main/PRIVACY.md)
 
-<img src="https://raw.githubusercontent.com/ibrolord/clipboard-router-releases/main/landing/public/product/plate-hero.png" width="960" alt="Clipboard Router history listing recent clips with search and filters">
+<img src="https://raw.githubusercontent.com/ibrolord/clipboard-router-releases/main/docs/assets/launch/reddit-swiftui-feature-hero-1600x900.png" width="960" alt="Clipboard Router showing searchable history, text transforms, Paste Stack, reviewed actions, Vault, encrypted sharing, and Private Session">
 
 </div>
 
