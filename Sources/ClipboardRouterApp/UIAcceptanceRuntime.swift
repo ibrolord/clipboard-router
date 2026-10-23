@@ -119,6 +119,15 @@ enum UIAcceptanceRuntime {
             textExpansionAccessibility: UIAcceptanceTextExpansionAccessibility(),
             textExpansionEvents: UIAcceptanceTextExpansionEvents(),
             supportDirectory: configuration.supportDirectory
+            ,
+            vaultSession: VaultSession(
+                authenticator: StubVaultAuthenticator(),
+                keyProvider: InMemoryVaultKeyProvider()
+            ),
+            vaultStore: InMemoryVaultStore(),
+            vaultAssetStore: InMemoryVaultEncryptedAssetStore(),
+            secureShareKeyProvider: InMemorySecureShareKeyProvider(),
+            secureShareReplayStore: InMemorySecureShareReplayStore()
         )
     }
 

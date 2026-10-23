@@ -1,5 +1,23 @@
 import Foundation
 
+/// Opaque identity of one unlock. Locking (explicitly, by timeout or lifecycle) and every
+/// unlock attempt produce a new epoch, so an approval bound to an old epoch is invalid even
+/// when the Vault is unlocked again. Carries no key material.
+public struct VaultUnlockEpoch: Equatable, Hashable, Sendable {
+    fileprivate let generation: UInt64
+}
+
+/// Lets work that runs inside `openWithoutExtendingIdleTimeout` re-check, at its final
+/// instant, that the Vault's idle deadline has not passed (for example after waiting on
+/// another lock). The epoch cannot change during that body because the session is
+/// isolated; only time can pass. Never extends the deadline; carries no key material.
+public struct VaultUnlockCheck: Sendable {
+    fileprivate let deadline: Date
+    fileprivate let now: @Sendable () -> Date
+
+    public func isStillUnlocked() -> Bool { now() < deadline }
+}
+
 public actor VaultSession: VaultSessionKeyAccess {
     public static let defaultTimeout: TimeInterval = 5 * 60
 
@@ -31,6 +49,34 @@ public actor VaultSession: VaultSessionKeyAccess {
     public var isUnlocked: Bool {
         _ = lockIfExpired()
         return keyData != nil
+    }
+
+    /// The current unlock epoch, or nil when locked. Never extends the idle deadline, so
+    /// background agent requests cannot keep the Vault open.
+    public func currentUnlockEpoch() -> VaultUnlockEpoch? {
+        _ = lockIfExpired()
+        guard keyData != nil else { return nil }
+        return VaultUnlockEpoch(generation: unlockGeneration)
+    }
+
+    /// Opens one envelope only while the session is still unlocked in exactly `epoch`, then
+    /// runs `body` with the item while still isolated, so a lock cannot interleave. Unlike
+    /// `withUnlockedKey` this never extends the idle deadline (agent requests must not keep
+    /// the Vault open), and the deadline is checked both before and after decryption.
+    public func openWithoutExtendingIdleTimeout<T: Sendable>(
+        _ envelope: VaultCiphertextEnvelope,
+        epoch: VaultUnlockEpoch,
+        _ body: @Sendable (VaultItem, VaultUnlockCheck) throws -> T
+    ) throws -> T {
+        _ = lockIfExpired()
+        guard let keyData, epoch.generation == unlockGeneration else { throw VaultError.locked }
+        let item = try VaultCrypto.open(envelope, using: keyData)
+        guard !lockIfExpired(), self.keyData != nil, epoch.generation == unlockGeneration,
+              let expiresAt
+        else {
+            throw VaultError.locked
+        }
+        return try body(item, VaultUnlockCheck(deadline: expiresAt, now: now))
     }
 
     public func prepareForStore(hasEncryptedItems: Bool) async {

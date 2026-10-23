@@ -31,6 +31,7 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
         let menuBarClipLimit: Int
         let fileStem: String
         let requiredAccessibilityValues: [String]
+        var requiredSwitchLabels: [String] = []
     }
 
     private struct Evidence: Codable {
@@ -65,7 +66,7 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
     func testRenderAllVisibleSettingsTabsAndClipCountStates() throws {
         let outputDirectory = try evidenceDirectory()
         let scenarios = matrixScenarios() + clipCountScenarios()
-        XCTAssertEqual(scenarios.count, 24)
+        XCTAssertEqual(scenarios.count, 27)
 
         var evidence: [Evidence] = []
         for scenario in scenarios {
@@ -105,6 +106,18 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
         )
     }
 
+    /// Focused coverage for the Agent Access switch so an earlier tab's failure in the full
+    /// matrix cannot hide a regression here. The matrix still runs the same checks.
+    func testAgentAccessSwitchLabelRendersAtEveryViewport() throws {
+        let outputDirectory = try evidenceDirectory()
+        let scenarios = matrixScenarios().filter { $0.tab == .agentAccess }
+        XCTAssertEqual(scenarios.count, viewports.count)
+        for scenario in scenarios {
+            XCTAssertFalse(scenario.requiredSwitchLabels.isEmpty)
+            _ = try render(scenario, into: outputDirectory)
+        }
+    }
+
     private func matrixScenarios() -> [Scenario] {
         let anchors: [SettingsTab: [String]] = [
             .general: ["30 days", "⌘⇧V"],
@@ -113,7 +126,11 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
             .crm: ["Salesforce"],
             .sync: ["Not configured — polling only", "Verified"],
             .license: ["Device"],
+            .agentAccess: ["Contents/Helpers/cr"],
             .privacy: ["45 seconds", "Off"],
+        ]
+        let switchLabels: [SettingsTab: [String]] = [
+            .agentAccess: ["Allow local AI agents to read clips you choose"],
         ]
 
         return viewports.flatMap { viewport in
@@ -123,7 +140,8 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
                     viewport: viewport,
                     menuBarClipLimit: 100,
                     fileStem: "settings-\(slug(tab))-\(viewport.slug)",
-                    requiredAccessibilityValues: anchors[tab]!
+                    requiredAccessibilityValues: anchors[tab]!,
+                    requiredSwitchLabels: switchLabels[tab] ?? []
                 )
             }
         }
@@ -262,6 +280,7 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
         }
         let imageURL = outputDirectory.appendingPathComponent("\(scenario.fileStem).png")
         try png.write(to: imageURL, options: .atomic)
+        try assertLabeledSwitches(in: bitmap, hostingView: hostingView, model: model, scenario: scenario)
         try assertRenderedSidebar(in: bitmap, selectedTab: scenario.tab, scenario: scenario)
         let sampledColorCount = sampledColors(in: bitmap)
         XCTAssertGreaterThan(
@@ -408,6 +427,78 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
         return colors.count
     }
 
+    /// SwiftUI bridges a grouped `Form` toggle to a bare AppKit `NSSwitch` that exposes no AX
+    /// title, description, identifier or title element in-process, so the toggle's label never
+    /// reaches `accessibilitySnapshot`. Prove the label is visibly rendered (OCR) on the same row
+    /// as exactly one native switch, and check that switch's role and state natively.
+    private func assertLabeledSwitches(
+        in bitmap: NSBitmapImageRep,
+        hostingView: NSView,
+        model: AppModel,
+        scenario: Scenario
+    ) throws {
+        guard !scenario.requiredSwitchLabels.isEmpty else { return }
+        guard let image = bitmap.cgImage else {
+            XCTFail("Could not read the rendered bitmap for \(scenario.fileStem)")
+            return
+        }
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = true
+        request.recognitionLanguages = ["en-US"]
+        try VNImageRequestHandler(cgImage: image, orientation: .up).perform([request])
+        let observations = request.results ?? []
+        let switches = descendants(of: hostingView)
+            .compactMap { $0 as? NSSwitch }
+            .filter { !$0.isHiddenOrHasHiddenAncestor }
+        let bounds = hostingView.bounds
+        let renderedBounds = hostingView.convert(hostingView.bounds, to: nil)
+
+        for label in scenario.requiredSwitchLabels {
+            let expectedLabel = normalizedOCRString(label)
+            guard let observation = observations.first(where: {
+                guard let candidate = $0.topCandidates(1).first?.string else { return false }
+                return normalizedOCRString(candidate) == expectedLabel
+            }) else {
+                XCTFail(
+                    "Switch label ‘\(label)’ is not visibly rendered in \(scenario.fileStem). OCR: \(observations.compactMap { $0.topCandidates(1).first?.string })"
+                )
+                continue
+            }
+            // Vision and the borderless window both use a bottom-left origin over the same bounds.
+            let labelFrame = CGRect(
+                x: observation.boundingBox.minX * bounds.width,
+                y: observation.boundingBox.minY * bounds.height,
+                width: observation.boundingBox.width * bounds.width,
+                height: observation.boundingBox.height * bounds.height
+            )
+            let rowSwitches = switches.filter {
+                let frame = $0.convert($0.bounds, to: nil)
+                return !frame.isEmpty
+                    && renderedBounds.contains(frame)
+                    && frame.minY < labelFrame.maxY
+                    && labelFrame.minY < frame.maxY
+                    && labelFrame.maxX <= frame.minX
+            }
+            guard rowSwitches.count == 1, let control = rowSwitches.first else {
+                XCTFail(
+                    "Expected one native switch beside ‘\(label)’ in \(scenario.fileStem), found \(rowSwitches.count) of \(switches.count)"
+                )
+                continue
+            }
+            XCTAssertEqual(control.accessibilityRole(), .button)
+            XCTAssertEqual(control.accessibilitySubrole(), .switch)
+            XCTAssertEqual(control.state, .off, "‘\(label)’ must start off with isolated defaults")
+            if scenario.tab == .agentAccess {
+                XCTAssertEqual(
+                    control.isEnabled,
+                    model.agentAccess.availability == .available,
+                    "‘\(label)’ must only be enabled when Agent Access is available"
+                )
+            }
+        }
+    }
+
     private func assertRenderedSidebar(
         in bitmap: NSBitmapImageRep,
         selectedTab: SettingsTab,
@@ -497,6 +588,7 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
             // Vision commonly reads the sans-serif capital I in “AI” as a lowercase L,
             // and can drop the leading lowercase i in the iCloud wordmark.
             .replacingOccurrences(of: "al assistant", with: "ai assistant")
+            .replacingOccurrences(of: " al agents ", with: " ai agents ")
             .replacingOccurrences(of: " cloud ", with: " icloud ")
         return padded.trimmingCharacters(in: .whitespacesAndNewlines)
     }

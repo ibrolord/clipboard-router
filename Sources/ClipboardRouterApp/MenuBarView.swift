@@ -189,6 +189,11 @@ struct MenuBarView: View {
             }
             .padding(12)
 
+            AgentAccessMenuBanner(access: model.agentAccess) {
+                UserDefaults.standard.set(SettingsTab.agentAccess.rawValue, forKey: "settings.selectedTab")
+                openSettings()
+            }
+
             HStack(spacing: 8) {
                 Menu {
                     Button("No Active Project") { model.setActiveDeveloperProject(nil) }

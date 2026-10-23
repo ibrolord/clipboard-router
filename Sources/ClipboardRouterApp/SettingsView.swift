@@ -12,6 +12,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case crm = "CRM"
     case sync = "iCloud"
     case license = "License"
+    case agentAccess = "Agent Access"
     case privacy = "Privacy"
 
     var id: Self { self }
@@ -24,8 +25,9 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     /// surface direct-license activation, settings, or purchase language, so the License tab
     /// itself is hidden there. Premium capabilities stay unlocked exactly as the engineering-
     /// evaluation policy already unlocks them; only this tab's visibility differs.
+    /// Agent Access (local MCP) is direct-distribution only, so the tab is hidden there too.
     static func visibleCases(isMacAppStoreDistribution: Bool) -> [Self] {
-        visibleCases.filter { $0 != .license || !isMacAppStoreDistribution }
+        visibleCases.filter { ($0 != .license && $0 != .agentAccess) || !isMacAppStoreDistribution }
     }
 
     static func resolved(storedValue: String) -> Self {
@@ -43,7 +45,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
     static func resolved(storedValue: String, isMacAppStoreDistribution: Bool) -> Self {
         let tab = resolved(storedValue: storedValue)
-        if tab == .license, isMacAppStoreDistribution { return .general }
+        if tab == .license || tab == .agentAccess, isMacAppStoreDistribution { return .general }
         return tab
     }
 
@@ -56,6 +58,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .crm: "building.2"
         case .sync: "icloud"
         case .license: "checkmark.seal"
+        case .agentAccess: "point.3.connected.trianglepath.dotted"
         case .privacy: "hand.raised"
         }
     }
@@ -140,6 +143,7 @@ struct SettingsView: View {
                 case .crm: CRMSettingsView(model: model)
                 case .sync: SavedLibrarySyncSettings(model: model)
                 case .license: DirectLicenseSettingsView(model: model)
+                case .agentAccess: AgentAccessSettings(model: model)
                 case .privacy: PrivacySettings(
                     model: model,
                     performsLiveRefreshes: performsLiveRefreshes

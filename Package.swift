@@ -24,6 +24,10 @@ let package = Package(
             name: "ClipboardRouterSync",
             targets: ["ClipboardRouterSync"]
         ),
+        .library(
+            name: "ClipboardRouterAgentAccess",
+            targets: ["ClipboardRouterAgentAccess"]
+        ),
         .executable(
             name: "ClipboardRouter",
             targets: ["ClipboardRouterApp"]
@@ -36,6 +40,13 @@ let package = Package(
             name: "cr-ui-acceptance",
             targets: ["ClipboardRouterUIAcceptance"]
         ),
+    ],
+    dependencies: [
+        // Official MCP Swift SDK, pinned exactly (tag 0.12.1 =
+        // a0ae212ebf6eab5f754c3129608bc5557637e605). 0.11.0 does not compile with the
+        // Swift 6.4 toolchain (region-isolation errors in NetworkTransport.swift).
+        // Linked only into the `cr` CLI.
+        .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", exact: "0.12.1"),
     ],
     targets: [
         .target(
@@ -74,9 +85,16 @@ let package = Package(
                 .linkedFramework("CryptoKit"),
             ]
         ),
+        .target(
+            name: "ClipboardRouterAgentAccess",
+            linkerSettings: [
+                .linkedFramework("Security"),
+            ]
+        ),
         .executableTarget(
             name: "ClipboardRouterApp",
             dependencies: [
+                "ClipboardRouterAgentAccess",
                 "ClipboardRouterCore",
                 "ClipboardRouterPlatform",
                 "ClipboardRouterSecurity",
@@ -85,7 +103,12 @@ let package = Package(
         ),
         .executableTarget(
             name: "ClipboardRouterCLI",
-            dependencies: ["ClipboardRouterCore", "ClipboardRouterSecurity"]
+            dependencies: [
+                "ClipboardRouterAgentAccess",
+                "ClipboardRouterCore",
+                "ClipboardRouterSecurity",
+                .product(name: "MCP", package: "swift-sdk"),
+            ]
         ),
         .executableTarget(
             name: "ClipboardRouterUIAcceptance"
@@ -109,6 +132,7 @@ let package = Package(
         .testTarget(
             name: "ClipboardRouterAppTests",
             dependencies: [
+                "ClipboardRouterAgentAccess",
                 "ClipboardRouterApp",
                 "ClipboardRouterCore",
                 "ClipboardRouterPlatform",
@@ -118,7 +142,17 @@ let package = Package(
         ),
         .testTarget(
             name: "ClipboardRouterCLITests",
-            dependencies: ["ClipboardRouterCLI", "ClipboardRouterCore", "ClipboardRouterSecurity"]
+            dependencies: [
+                "ClipboardRouterAgentAccess",
+                "ClipboardRouterCLI",
+                "ClipboardRouterCore",
+                "ClipboardRouterSecurity",
+                .product(name: "MCP", package: "swift-sdk"),
+            ]
+        ),
+        .testTarget(
+            name: "ClipboardRouterAgentAccessTests",
+            dependencies: ["ClipboardRouterAgentAccess"]
         )
     ],
     swiftLanguageModes: [.v6]

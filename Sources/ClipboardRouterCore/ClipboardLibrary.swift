@@ -39,6 +39,15 @@ public actor ClipboardLibrary {
         state
     }
 
+    /// Runs `body` synchronously against the committed (already persisted) snapshot while the
+    /// actor is isolated, so no mutation becomes visible between the read and a decision the
+    /// caller makes inside `body`.
+    public func withCommittedSnapshot<T: Sendable>(
+        _ body: @Sendable (ClipboardLibrarySnapshot) throws -> T
+    ) rethrows -> T {
+        try body(state)
+    }
+
     @discardableResult
     public func capture(_ candidate: CaptureCandidate) async throws -> CaptureOutcome {
         await acquireMutationPermit()

@@ -262,6 +262,32 @@ PY
     return 0
 }
 
+# Usage: validate_distribution_marker RAW_MARKER EXPECTED_CHANNEL REQUIRE_CUSTOMER
+# A missing marker is treated as legacy "direct" only for plain verification. Whenever a
+# current direct build is asserted (--expect-distribution-channel direct) or a customer
+# release is required for an effectively-direct build, the signed marker must be exactly
+# "direct": the app's Agent Access and `cr mcp` refuse a missing marker, so a release check
+# must not pass one.
+validate_distribution_marker() {
+    local raw="$1" expected="$2" require_customer="$3"
+    RELEASE_VALIDATION_ERROR=""
+    if [[ -n "${raw}" && "${raw}" != "direct" && "${raw}" != "macAppStore" ]]; then
+        RELEASE_VALIDATION_ERROR="ClipboardRouterDistributionChannel must be direct or macAppStore"
+        return 1
+    fi
+    local effective="${raw:-direct}"
+    if [[ -n "${expected}" && "${effective}" != "${expected}" ]]; then
+        RELEASE_VALIDATION_ERROR="packaged distribution channel does not match --expect-distribution-channel"
+        return 1
+    fi
+    if [[ "${effective}" == "direct" && ( "${expected}" == "direct" || "${require_customer}" == "1" ) \
+        && "${raw}" != "direct" ]]; then
+        RELEASE_VALIDATION_ERROR="direct release must carry the signed ClipboardRouterDistributionChannel=direct marker"
+        return 1
+    fi
+    return 0
+}
+
 validate_app_icon() {
     local icns_path="$1"
     local extract_dir

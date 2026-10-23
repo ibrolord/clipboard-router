@@ -172,7 +172,10 @@ answers must be reviewed before release.
 ## Requirements
 
 - A Mac running macOS 14 or later.
-- Xcode with a Swift 6-capable toolchain.
+- Xcode 26.3 or newer (Swift 6.2.4 or newer). The locked dependencies (MCP Swift SDK 0.12.1 and
+  transitive packages such as swift-collections 1.7.3) require it; `Package.swift`'s tools-version
+  6.0 is not a minimum-toolchain guarantee for the dependency graph. It was tested locally with
+  Swift 6.4 (Xcode 27.1); CI uses macOS 26 with the current Xcode 26.x.
 - Command Line Tools selected with `xcode-select`.
 - No Apple Developer account is required for local tests or an ad-hoc local build.
 - Calendar, Contacts, and Location permissions are optional and requested only from their explicit
@@ -216,6 +219,18 @@ Or run the repository verification wrapper:
 ```bash
 ./Scripts/verify_source.sh
 ```
+
+To run the Agent Access test targets on their own:
+
+```bash
+swift test --filter ClipboardRouterAgentAccessTests
+swift test --filter ClipboardRouterCLITests
+swift test --filter AgentAccessAppTests
+swift test --filter VaultAgentHandoffTests
+```
+
+The signed synthetic end-to-end harness is described in `Scripts/mcp/README.md`; user-facing
+behavior is documented in [AGENT_ACCESS.md](AGENT_ACCESS.md).
 
 `verify_source.sh` checks shell syntax, every plist, the Swift package manifest, and the Swift tests. It also runs `shellcheck` when that optional tool is installed.
 

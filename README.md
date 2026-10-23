@@ -178,6 +178,10 @@ Clipboard Router never presses Send for you.
   drag-and-drop, and a three-column library.
 - **Bundled `cr` command-line tool** — Run matching analyze and transform pipelines from Terminal
   without changing PATH.
+- **Agent Access (MCP)** — Off by default; let Claude Code, Codex, or another MCP agent read only
+  the plain-text clips and links you pick, with a pairing code approved in the app for every
+  connection. Direct download only; not in the Mac App Store build. See
+  [Agent Access](docs/AGENT_ACCESS.md).
 
 </details>
 
@@ -224,7 +228,11 @@ SHA-256
 
 ## Build from source
 
-You need macOS 14 or later and a Swift 6-capable Xcode toolchain.
+You need macOS 14 or later and Swift 6.2.4 or newer (Xcode 26.3 or newer). The locked dependencies,
+the MCP Swift SDK 0.12.1 and its transitive packages such as swift-collections 1.7.3, require it;
+`Package.swift` declares tools-version 6.0, which is not a minimum-toolchain guarantee for the
+dependency graph. Development was tested locally with Swift 6.4 (Xcode 27.1); CI uses macOS 26
+with the current Xcode 26.x.
 
 ```bash
 git clone https://github.com/ibrolord/clipboard-router.git

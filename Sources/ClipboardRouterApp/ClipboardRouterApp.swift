@@ -1,5 +1,6 @@
 import AppKit
 import CloudKit
+import ClipboardRouterAgentAccess
 import ClipboardRouterPlatform
 import SwiftUI
 
@@ -243,6 +244,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task { @MainActor in
             await model.start()
             guard UIAcceptanceRuntime.configuration() != nil, model.isReady else { return }
+            // UI-acceptance only: content-free flags explaining Agent Access availability.
+            let diagnostic = AppIdentityContext.diagnose().sorted { $0.key < $1.key }
+                .map { "\($0.key)=\($0.value)" }.joined(separator: " ")
+            FileHandle.standardError.write(Data("AGENT_ACCESS_DIAGNOSTIC \(diagnostic)\n".utf8))
             FileHandle.standardError.write(Data("UI_ACCEPTANCE_READY\n".utf8))
         }
     }

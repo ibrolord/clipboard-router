@@ -175,13 +175,13 @@ DISTRIBUTION_CHANNEL="$(/usr/libexec/PlistBuddy -c 'Print :ClipboardRouterDistri
 [[ -n "${CONTACTS_USAGE}" ]] || die "NSContactsUsageDescription is missing"
 [[ -n "${LOCATION_USAGE}" ]] || die "NSLocationWhenInUseUsageDescription is missing"
 [[ "${CRM_CALLBACK_SCHEME}" == "clipboardrouter" ]] || die "clipboardrouter OAuth callback scheme is missing"
-[[ -z "${DISTRIBUTION_CHANNEL}" || "${DISTRIBUTION_CHANNEL}" == "direct" \
-    || "${DISTRIBUTION_CHANNEL}" == "macAppStore" ]] \
-    || die "ClipboardRouterDistributionChannel must be direct or macAppStore"
+validate_distribution_marker "${DISTRIBUTION_CHANNEL}" "${EXPECTED_DISTRIBUTION_CHANNEL}" "${REQUIRE_CUSTOMER_RELEASE}" \
+    || die "${RELEASE_VALIDATION_ERROR}"
 EFFECTIVE_DISTRIBUTION_CHANNEL="${DISTRIBUTION_CHANNEL:-direct}"
-if [[ -n "${EXPECTED_DISTRIBUTION_CHANNEL}" ]]; then
-    [[ "${EFFECTIVE_DISTRIBUTION_CHANNEL}" == "${EXPECTED_DISTRIBUTION_CHANNEL}" ]] \
-        || die "packaged distribution channel does not match --expect-distribution-channel"
+if [[ "${DISTRIBUTION_CHANNEL}" == "direct" ]]; then
+    CLI_SIGNING_IDENTIFIER="$(/usr/bin/codesign -dv "${CLI_EXECUTABLE}" 2>&1 | /usr/bin/sed -n 's/^Identifier=//p')"
+    [[ "${CLI_SIGNING_IDENTIFIER}" == "com.clipboardrouter.cr" ]] \
+        || die "direct-channel Contents/Helpers/cr must be signed with identifier com.clipboardrouter.cr"
 fi
 if [[ "${REQUIRE_CUSTOMER_RELEASE}" -eq 1 ]]; then
     /usr/bin/python3 -c 'import sys, urllib.parse; p=urllib.parse.urlsplit(sys.argv[1]); ok=(p.scheme=="https" and bool(p.hostname) and p.username is None and p.password is None and not p.query and not p.fragment and not any(c.isspace() for c in sys.argv[1])); raise SystemExit(0 if ok else 1)' "${LICENSE_SERVICE_URL}" \

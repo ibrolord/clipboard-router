@@ -12,6 +12,7 @@ enum CLIOutputFormat: String, Equatable {
 enum CLICommand: Equatable {
     case help
     case version
+    case mcp
     case analyze(format: CLIOutputFormat, inputPath: String?)
     case transform(transform: SafeTextTransform, inputPath: String?)
     case bundle(
@@ -36,6 +37,10 @@ enum CLIArgumentParser {
             return try parseTransform(Array(arguments.dropFirst()))
         case "bundle":
             return try parseBundle(Array(arguments.dropFirst()))
+        case "mcp":
+            // No arguments of any kind: the endpoint and who may connect are never configurable.
+            guard arguments.count == 1 else { throw CLIError.unexpectedArguments }
+            return .mcp
         case "help", "--help", "-h":
             return .help
         case "--version", "version":
@@ -52,9 +57,14 @@ enum CLIArgumentParser {
       cr bundle --project NAME [--problem TEXT] [--root-label LABEL]
                 [--branch BRANCH] [--language LANGUAGE] [--runtime RUNTIME]
                 [--format markdown|json] [FILE|- ...]
+      cr mcp
 
-    Input defaults to stdin. All processing is local; cr does not access the Clipboard Router
-    database, pasteboard, Vault, sync, network, or other processes.
+    mcp connects an MCP client to the running Clipboard Router app (direct-download build). It
+    requires Agent Access to be enabled and the connection approved in the app.
+
+    For analyze, transform and bundle, input defaults to stdin and all processing is local; they
+    do not access the Clipboard Router database, pasteboard, Vault, sync, network, or other
+    processes.
     """
 
     private static func parseAnalyze(_ arguments: [String]) throws -> CLICommand {
@@ -176,6 +186,9 @@ struct CLIApplication {
             return CLIArgumentParser.usage + "\n"
         case .version:
             return CLIReleaseInfo.displayVersion() + "\n"
+        case .mcp:
+            // Dispatched by the entry point before this runs; never reached with input.
+            throw CLIError.usage(CLIArgumentParser.usage)
 
         case let .analyze(format, inputPath):
             let input = try validatedInput(readInput(inputPath))
@@ -355,6 +368,7 @@ enum CLIError: Error, Equatable, LocalizedError {
     case missingProject
     case tooManyInputs
     case duplicateStandardInput
+    case unexpectedArguments
     case inputTooLarge(actual: Int, maximum: Int)
     case invalidUTF8
     case cannotRead(String, String)
@@ -371,6 +385,7 @@ enum CLIError: Error, Equatable, LocalizedError {
         case .missingProject: "bundle requires --project NAME."
         case .tooManyInputs: "This command accepts at most one input file."
         case .duplicateStandardInput: "Standard input can be used only once."
+        case .unexpectedArguments: "This command accepts no arguments."
         case let .inputTooLarge(actual, maximum):
             "Input is \(actual) bytes; the limit is \(maximum) bytes."
         case .invalidUTF8: "Input must be valid UTF-8 text."
@@ -383,10 +398,15 @@ enum CLIError: Error, Equatable, LocalizedError {
 
 @main
 enum CRMain {
-    static func main() {
+    static func main() async {
         do {
+            let arguments = Array(CommandLine.arguments.dropFirst())
+            if arguments.first == "mcp" {
+                guard case .mcp = try CLIArgumentParser.parse(arguments) else { exit(2) }
+                exit(await MCPCommand.run(MCPCommand.productionEnvironment()))
+            }
             let output = try CLIApplication().run(
-                arguments: Array(CommandLine.arguments.dropFirst()),
+                arguments: arguments,
                 readInput: BoundedCLIInput.read(path:)
             )
             FileHandle.standardOutput.write(Data(output.utf8))
@@ -397,7 +417,7 @@ enum CRMain {
                 exit(5)
             case .usage, .unknownOption, .invalidOption, .missingOptionValue,
                  .missingTransform, .invalidTransform, .missingProject, .tooManyInputs,
-                 .duplicateStandardInput:
+                 .duplicateStandardInput, .unexpectedArguments:
                 exit(2)
             default:
                 exit(1)
