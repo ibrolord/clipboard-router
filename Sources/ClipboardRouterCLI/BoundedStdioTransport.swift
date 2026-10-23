@@ -427,7 +427,7 @@ actor BoundedStdioTransport: Transport {
         // request is already gone retires nothing.
         let responseTarget: (key: String, generation: UInt64)? = {
             guard case let .response(key) = JSONRPCShape.classify(data),
-                  let generation = admission.generation(of: key)
+                  let generation = self.admission.generation(of: key)
             else { return nil }
             return (key, generation)
         }()
