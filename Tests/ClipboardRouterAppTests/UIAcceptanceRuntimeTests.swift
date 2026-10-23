@@ -206,6 +206,27 @@ final class UIAcceptanceRuntimeTests: XCTestCase {
         )
     }
 
+    func testAcceptanceModelOpensVaultWithIsolatedInMemoryProviders() async throws {
+        let configuration = try makeConfiguration()
+        defer { cleanUp(configuration) }
+
+        let model = try XCTUnwrap(UIAcceptanceRuntime.makeModel(configuration: configuration))
+        await model.start()
+
+        // An injected in-memory store bypasses the signed-process Keychain capability gate, so
+        // an open Vault with no availability error proves no production providers were used.
+        XCTAssertNil(model.vaultAvailabilityMessage)
+        XCTAssertEqual(model.vaultEncryptedItemCount, 0)
+        XCTAssertFalse(FileManager.default.fileExists(
+            atPath: configuration.supportDirectory
+                .appendingPathComponent("vault.encrypted.json").path
+        ))
+        XCTAssertFalse(FileManager.default.fileExists(
+            atPath: configuration.supportDirectory
+                .appendingPathComponent("secure-share-replay.json").path
+        ))
+    }
+
     func testAcceptanceModelUsesProductionSQLiteInItsExactRunDirectory() async throws {
         let configuration = try makeConfiguration()
         defer { cleanUp(configuration) }

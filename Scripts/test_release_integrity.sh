@@ -397,4 +397,23 @@ expect_script_failure \
     "--expect-distribution-channel must be direct or macAppStore" \
     /bin/bash "${VERIFY_SCRIPT}" --expect-distribution-channel bogus
 
+# Agent Access refuses a missing marker, so asserted-direct and customer releases must too.
+validate_distribution_marker "" "direct" "0" \
+    && fail "verifier accepted a missing marker for --expect-distribution-channel direct"
+[[ "${RELEASE_VALIDATION_ERROR}" == "direct release must carry the signed ClipboardRouterDistributionChannel=direct marker" ]] \
+    || fail "unexpected missing-marker error: ${RELEASE_VALIDATION_ERROR}"
+pass "asserted direct release rejects a missing distribution marker"
+validate_distribution_marker "" "" "1" \
+    && fail "verifier accepted a missing marker for a customer release"
+pass "customer release rejects a missing distribution marker"
+validate_distribution_marker "direct" "direct" "1" \
+    || fail "verifier rejected an explicit direct marker: ${RELEASE_VALIDATION_ERROR}"
+validate_distribution_marker "" "" "0" \
+    || fail "plain legacy verification must still treat a missing marker as direct"
+validate_distribution_marker "macAppStore" "macAppStore" "1" \
+    || fail "Mac App Store customer verification must be unchanged: ${RELEASE_VALIDATION_ERROR}"
+validate_distribution_marker "macAppStore" "direct" "0" \
+    && fail "verifier accepted a Mac App Store marker as direct"
+pass "explicit direct, legacy plain and Mac App Store marker validation are unchanged"
+
 echo "Release integrity regressions passed (${TESTS_RUN} checks)."

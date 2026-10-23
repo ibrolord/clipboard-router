@@ -1,6 +1,19 @@
 import ClipboardRouterCore
 import Foundation
 
+/// Memory-only proof of what the user approved for one agent handoff: the item, its exact
+/// ciphertext envelope, and the unlock epoch. Contains no key material.
+public struct VaultAgentHandoffApproval: Equatable, Sendable {
+    public let itemID: UUID
+    let envelope: VaultCiphertextEnvelope
+    let epoch: VaultUnlockEpoch
+}
+
+public struct VaultAgentHandoffPreview: Sendable {
+    public let approval: VaultAgentHandoffApproval
+    public let item: VaultItem
+}
+
 public actor VaultLibrary {
     private let store: any VaultStore
     private let assetStore: any VaultEncryptedAssetStoring
@@ -171,6 +184,42 @@ public actor VaultLibrary {
             try VaultCrypto.open(envelope, using: key)
         }
         return try await restoredPayload(for: item)
+    }
+
+    /// Opens one item for the foreground agent-handoff preview without extending the idle
+    /// deadline. The returned approval binds the exact ciphertext envelope and unlock epoch
+    /// the user saw; it is memory-only and carries no key material.
+    public func agentHandoffPreview(id: UUID) async throws -> VaultAgentHandoffPreview {
+        guard let envelope = snapshot.envelopes.first(where: { $0.id == id }) else {
+            throw VaultError.itemNotFound(id)
+        }
+        guard let epoch = await session.currentUnlockEpoch() else { throw VaultError.locked }
+        let item = try await session.openWithoutExtendingIdleTimeout(envelope, epoch: epoch) { item, _ in item }
+        // Actor reentrancy: the item may have been replaced or deleted during the awaits.
+        guard snapshot.envelopes.first(where: { $0.id == id }) == envelope else {
+            throw VaultError.itemNotFound(id)
+        }
+        return VaultAgentHandoffPreview(
+            approval: VaultAgentHandoffApproval(itemID: id, envelope: envelope, epoch: epoch),
+            item: item
+        )
+    }
+
+    /// Releases an approved item to `body` only if the Vault still holds exactly the envelope
+    /// the user approved (full ciphertext equality, so a same-timestamp replacement or a
+    /// deletion fails) and the session is still in the approved unlock epoch. The mutation
+    /// permit is held throughout, so no replace/delete can interleave; `body` runs inside the
+    /// session's isolation. Never reads encrypted assets and never extends the idle deadline.
+    public func releaseApprovedAgentHandoff<T: Sendable>(
+        _ approval: VaultAgentHandoffApproval,
+        _ body: @Sendable (VaultItem, VaultUnlockCheck) throws -> T
+    ) async throws -> T {
+        await acquireMutationPermit()
+        defer { releaseMutationPermit() }
+        guard snapshot.envelopes.first(where: { $0.id == approval.itemID }) == approval.envelope else {
+            throw VaultError.itemNotFound(approval.itemID)
+        }
+        return try await session.openWithoutExtendingIdleTimeout(approval.envelope, epoch: approval.epoch, body)
     }
 
     public func verifyAssets(for item: VaultItem) async throws {

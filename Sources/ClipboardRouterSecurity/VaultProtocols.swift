@@ -23,4 +23,11 @@ public protocol VaultSessionKeyAccess: Sendable {
     func withUnlockedKey<T: Sendable>(
         _ operation: @Sendable (Data) throws -> T
     ) async throws -> T
+    /// Non-extending, epoch-bound read used for agent handoff (see `VaultSession`).
+    func currentUnlockEpoch() async -> VaultUnlockEpoch?
+    func openWithoutExtendingIdleTimeout<T: Sendable>(
+        _ envelope: VaultCiphertextEnvelope,
+        epoch: VaultUnlockEpoch,
+        _ body: @Sendable (VaultItem, VaultUnlockCheck) throws -> T
+    ) async throws -> T
 }

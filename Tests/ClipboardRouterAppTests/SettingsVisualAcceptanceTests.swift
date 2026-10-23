@@ -65,7 +65,7 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
     func testRenderAllVisibleSettingsTabsAndClipCountStates() throws {
         let outputDirectory = try evidenceDirectory()
         let scenarios = matrixScenarios() + clipCountScenarios()
-        XCTAssertEqual(scenarios.count, 24)
+        XCTAssertEqual(scenarios.count, 27)
 
         var evidence: [Evidence] = []
         for scenario in scenarios {
@@ -113,6 +113,7 @@ final class SettingsVisualAcceptanceTests: XCTestCase {
             .crm: ["Salesforce"],
             .sync: ["Not configured — polling only", "Verified"],
             .license: ["Device"],
+            .agentAccess: ["Allow local AI agents to read clips you choose"],
             .privacy: ["45 seconds", "Off"],
         ]
 

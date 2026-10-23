@@ -1,5 +1,6 @@
 import AppKit
 import CloudKit
+import ClipboardRouterAgentAccess
 import ClipboardRouterCore
 import ClipboardRouterPlatform
 import ClipboardRouterSecurity
@@ -560,7 +561,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var cloudPushInstallationStatus: CloudPushInstallationStatus =
         .notConfigured
     @Published private(set) var cloudPushRegistrationMessage: String?
-    @Published private(set) var sharedFolderSnapshots: [UUID: SharedFolderSessionSnapshot] = [:]
+    @Published private(set) var sharedFolderSnapshots: [UUID: SharedFolderSessionSnapshot] = [:] {
+        didSet { widenAgentAccessExclusions() }
+    }
     @Published private(set) var sharedFolderCapability: SharedCloudCapability =
         .unavailable(.configurationMissing)
     @Published private(set) var sharedFolderMessage: String?
@@ -782,11 +785,30 @@ final class AppModel: ObservableObject {
     private let privateSession: PrivateSession<PrivateSessionClip>
     private var library: ClipboardLibrary?
     private var vaultLibrary: VaultLibrary?
+    /// Local agent (MCP) access: off by default, direct channel only, scoped to explicitly
+    /// selected saved clips/folders, per-connection pairing, per-item Vault approval.
+    lazy var agentAccess: AgentAccessController = AgentAccessController(
+        defaults: defaults,
+        isMacAppStore: distributionChannelProvider.channel == .macAppStore,
+        vaultLibrary: { [weak self] in
+            guard let self, self.isVaultUnlocked else { return nil }
+            return self.vaultLibrary
+        }
+    )
+    /// Outcome of the most recent remote projection into the local library this launch.
+    /// Distinct from `syncLastSuccessfulDate`, which is set before projection and therefore
+    /// never implies the local snapshot is fresh.
+    private(set) var savedLibraryProjection: SyncStatusReport.Projection = .notAppliedThisLaunch
+    private(set) var savedLibraryProjectionDate: Date?
     private var syncCoordinator: SavedLibrarySyncCoordinator?
     private var cloudPushSubscriptionCoordinator: CloudPushSubscriptionCoordinator?
     private var sharedFolderTransport: (any SharedFolderTransport)?
     private var cloudKitSharedFolderAdapter: CloudKitSharedFolderAdapter?
-    private var sharedFolderSessions: [UUID: SharedFolderSession] = [:]
+    private var sharedFolderSessions: [UUID: SharedFolderSession] = [:] {
+        // Synchronous, before any await of the share/open flow: a folder that becomes
+        // collaborative is excluded from agent access before its data can change.
+        didSet { widenAgentAccessExclusions() }
+    }
     private var pendingCloudKitShareMetadata: [CKShare.Metadata] = []
     private var shareAcceptanceTask: Task<Void, Never>?
     private var searchTask: Task<Void, Never>?
@@ -1723,6 +1745,8 @@ final class AppModel: ObservableObject {
                 statusMessage = "\(globalHotKeyChoice.displayName) is already in use. Choose another shortcut in Settings or open Clipboard Router from the menu bar."
             }
             isReady = true
+            publishAgentAccessStatus()
+            if let library { agentAccess.attach(library: library) }
             startRetentionPruneLoopIfNeeded()
             startDirectLicenseRefreshLoopIfNeeded()
 
@@ -9441,6 +9465,7 @@ final class AppModel: ObservableObject {
         vaultSummaries = []
         selectedVaultItemID = nil
         selectedVaultItem = nil
+        agentAccess.vaultDidLock()
     }
 
     private func beginVaultStateObservation() {
@@ -9520,7 +9545,7 @@ final class AppModel: ObservableObject {
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
-                Task { @MainActor in await self?.handleVaultLifecycle(.appDidEnterBackground) }
+                MainActor.assumeIsolated { self?.receiveLifecycleNotification(.appDidEnterBackground) }
             }
         )
         lifecycleObservers.append(
@@ -9529,7 +9554,7 @@ final class AppModel: ObservableObject {
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
-                Task { @MainActor in await self?.handleVaultLifecycle(.systemWillSleep) }
+                MainActor.assumeIsolated { self?.receiveLifecycleNotification(.systemWillSleep) }
             }
         )
         lifecycleObservers.append(
@@ -9538,7 +9563,7 @@ final class AppModel: ObservableObject {
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
-                Task { @MainActor in await self?.handleVaultLifecycle(.screenDidLock) }
+                MainActor.assumeIsolated { self?.receiveLifecycleNotification(.screenDidLock) }
             }
         )
         lifecycleObservers.append(
@@ -9547,9 +9572,17 @@ final class AppModel: ObservableObject {
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
-                Task { @MainActor in await self?.handleVaultLifecycle(.appWillTerminate) }
+                MainActor.assumeIsolated { self?.receiveLifecycleNotification(.appWillTerminate) }
             }
         )
+    }
+
+    /// Lifecycle notifications are delivered on the main queue. Agent authority is revoked
+    /// synchronously here, before any await, so no agent read or Vault handoff can be
+    /// authorized while the asynchronous Vault cleanup below is still pending.
+    func receiveLifecycleNotification(_ event: VaultLifecycleEvent) {
+        agentAccess.handleLifecycle(event)
+        Task { @MainActor [weak self] in await self?.handleVaultLifecycle(event) }
     }
 
     private func handleVaultLifecycle(_ event: VaultLifecycleEvent) async {
@@ -10939,8 +10972,13 @@ final class AppModel: ObservableObject {
                 managedSavedClipIDs: managedSavedClipIDs,
                 managedFolderIDs: managedFolderIDs
             )
+            savedLibraryProjection = .applied
+            savedLibraryProjectionDate = Date()
             try await refreshSnapshot()
         } catch {
+            savedLibraryProjection = .failed
+            savedLibraryProjectionDate = Date()
+            publishAgentAccessStatus()
             syncAvailabilityMessage = "Remote changes are safe in the sync log, but could not be applied locally: \(error.localizedDescription)"
         }
     }
@@ -11526,6 +11564,42 @@ final class AppModel: ObservableObject {
         }
         scheduleUserSmartViewCountRefresh()
         try? await collectUnreferencedAssets()
+        publishAgentAccessStatus()
+    }
+
+    /// Pushes content-free readiness/sync state and shared-folder exclusions to the agent
+    /// backend. Never triggers sync or network work.
+    private func publishAgentAccessStatus() {
+        let sync: SyncStatusReport.Sync
+        switch syncSnapshot.status {
+        case .disabled: sync = .disabled
+        case .idle: sync = .idle
+        case .syncing: sync = .syncing
+        case .offline: sync = .offline
+        case .accountUnavailable: sync = .accountUnavailable
+        case .failed: sync = .failed
+        }
+        agentAccess.updateStatus(SyncStatusReport(
+            snapshotReady: isReady,
+            sync: syncSnapshot.isEnabled ? sync : .disabled,
+            lastProjection: savedLibraryProjection,
+            lastProjectionAtEpochSeconds: savedLibraryProjectionDate.map { Int64($0.timeIntervalSince1970) }
+        ))
+        agentAccess.addExclusions(
+            folderIDs: privateSyncSharedFolderIDs,
+            savedClipIDs: Set(sharedFolderSnapshots.values.flatMap(\.managedSavedClipIDs))
+        )
+    }
+
+    /// Additive only: never removes an exclusion. Removal happens solely in
+    /// `publishAgentAccessStatus` after a committed snapshot refresh.
+    private func widenAgentAccessExclusions() {
+        agentAccess.addExclusions(
+            folderIDs: Set(sharedFolderSessions.keys)
+                .union(sharedFolderSnapshots.keys)
+                .union(sharedFolderSnapshots.values.flatMap(\.managedFolderIDs)),
+            savedClipIDs: Set(sharedFolderSnapshots.values.flatMap(\.managedSavedClipIDs))
+        )
     }
 
     private func refreshUserSmartViewCounts() async {

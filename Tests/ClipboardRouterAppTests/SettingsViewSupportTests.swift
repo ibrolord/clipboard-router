@@ -18,7 +18,7 @@ final class SettingsViewSupportTests: XCTestCase {
     func testVisibleTabsExcludeLegacyAutomationsDestination() {
         XCTAssertEqual(
             SettingsTab.visibleCases,
-            [.general, .destinations, .assistant, .crm, .sync, .license, .privacy]
+            [.general, .destinations, .assistant, .crm, .sync, .license, .agentAccess, .privacy]
         )
     }
 
@@ -54,6 +54,11 @@ final class SettingsViewSupportTests: XCTestCase {
         XCTAssertFalse(
             SettingsTab.visibleCases(isMacAppStoreDistribution: true).contains(.license)
         )
+        XCTAssertFalse(
+            SettingsTab.visibleCases(isMacAppStoreDistribution: true).contains(.agentAccess),
+            "Agent Access is direct-distribution only"
+        )
+        XCTAssertEqual(SettingsTab.resolved(storedValue: "Agent Access", isMacAppStoreDistribution: true), .general)
     }
 
     func testMacAppStoreDistributionClampsAStoredLicenseSelectionToGeneral() {

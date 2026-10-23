@@ -472,6 +472,11 @@ echo "Signing cr with ${SIGN_IDENTITY}..."
 CLI_SIGN_ARGS=(--force --sign "${SIGN_IDENTITY}" --options runtime)
 if [[ "${DISTRIBUTION_CHANNEL}" == "macAppStore" ]]; then
     CLI_SIGN_ARGS+=(--entitlements "${MAC_APP_STORE_HELPER_ENTITLEMENTS}")
+else
+    # Direct builds give the helper an explicit identifier: the app's Agent Access broker
+    # accepts only this identifier, signed by the app's own team, at Contents/Helpers/cr.
+    # Mac App Store signing is unchanged (Agent Access is unavailable there).
+    CLI_SIGN_ARGS+=(--identifier com.clipboardrouter.cr)
 fi
 CLI_SIGN_ARGS+=("${TIMESTAMP_ARGS[@]}")
 /usr/bin/codesign "${CLI_SIGN_ARGS[@]}" "${HELPERS_DIR}/cr"
